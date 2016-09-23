@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-int main() {
+#define MAX_LENGTH 1024
+
+int main(int argc, char *argv[]) {
 
     /*
      * Initialize variables
@@ -9,6 +12,15 @@ int main() {
     /*
      * Produce Prompt
      */
+    char line[MAX_LENGTH];
+
+    while (1) {
+        printf("$ ");
+        if (!fgets(line, MAX_LENGTH, stdin)) break;
+        system(line);
+    }
+
+
 
     /*
      * Parse input
