@@ -1,23 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+#include "parser.h"
 
 #define MAX_LENGTH 1024
+#define MAX_COMMANDS 4
+#define STRCMP(a, R, b) strcmp(a, b) R 0
+
 
 int main(int argc, char *argv[]) {
 
     /*
      * Initialize variables
      */
+    //static const unsigned int MAX_COMMANDS = 2;
+    command comLine[MAX_COMMANDS + 1];
 
     /*
      * Produce Prompt
      */
     char line[MAX_LENGTH];
 
+
     while (1) {
         printf("$ ");
         if (!fgets(line, MAX_LENGTH, stdin)) break;
-        system(line);
+        //int expected = 1;
+        int numberOfCommands = parse(line, comLine);
+        printf("number of commands: %d\n", numberOfCommands);
+        for(int commandLooper = 0; commandLooper < numberOfCommands; commandLooper++){
+            printf("command name: %s\n", comLine[commandLooper].argv[0]);
+            printf("number of args: %d\n", comLine[commandLooper].argc-1);
+        }
+        //assert(actual == expected);
+        //system(line);
     }
 
 
