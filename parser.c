@@ -184,4 +184,3 @@ int parse(const char *line, command comLine[])
 
     return comc;
 }
-}

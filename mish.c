@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include "parser.h"
+#include "mish.h"
+#include <stdbool.h>
 
 #define MAX_LENGTH 1024
 #define MAX_COMMANDS 4
@@ -25,22 +28,31 @@ int main(int argc, char *argv[]) {
     while (1) {
         printf("$ ");
         if (!fgets(line, MAX_LENGTH, stdin)) break;
-        //int expected = 1;
+
+        /*
+         * Parse
+         */
         int numberOfCommands = parse(line, comLine);
+
+        /*
+         * flag internal commands
+         */
+        if (flagInternalCommands(comLine, numberOfCommands)== -1){
+            fprintf(stderr, "In the current version, it is not allowed to pipe "
+                    "internal comands\n");
+            exit(0);
+        }
+
+
+
         printf("number of commands: %d\n", numberOfCommands);
         for(int commandLooper = 0; commandLooper < numberOfCommands; commandLooper++){
             printf("command name: %s\n", comLine[commandLooper].argv[0]);
             printf("number of args: %d\n", comLine[commandLooper].argc-1);
         }
-        //assert(actual == expected);
-        //system(line);
+
     }
 
-
-
-    /*
-     * Parse input
-     */
 
     /*
      * Dispatch internal commands
@@ -62,6 +74,52 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+
+
+
+/**
+ * flagInternalCommands
+ *
+ * loops over the command list and flags internal commands. Internal command
+ * names need to be defined in this function. If there is m ore than one command
+ * and there is at least one internal, flagInternalCommands returns with -1 as
+ * in the current version, it can not be possible to pipe internal commands.
+ *
+ * @param comLine
+ * @param nCommands
+ * @return
+ */
+int flagInternalCommands(command comLine[MAX_COMMANDS + 1], int nCommands ){
+
+    int numberOfInternals = 2;
+    char *internalCommands[numberOfInternals];
+
+    const char internal_cd[] = "cd";
+    const char internal_echo[] = "echo";
+    internalCommands[0] = internal_cd;
+    internalCommands[1] = internal_echo;
+
+    int anyInternal = false;
+
+    for (int commandLooper = 0; commandLooper < nCommands; commandLooper++){
+        int internal = false;
+        for(int internalLooper = 0; internalLooper < numberOfInternals; internalLooper++){
+            if(strcmp(comLine[commandLooper].argv[0], internalCommands[internalLooper]) == 0){
+                internal = true;
+                anyInternal = true;
+            }
+        }
+        if (internal){
+            comLine[commandLooper].internal = true;
+        } else {
+            comLine[commandLooper].internal = false;
+        }
+    }
+    if (nCommands > 1 && anyInternal){
+        return -1;
+    }
+    return 0;
+}
 
 
 /*
