@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
 #include "parser.h"
 #include "mish.h"
 #include <stdbool.h>
@@ -16,7 +17,6 @@ int main(int argc, char *argv[]) {
     /*
      * Initialize variables
      */
-    //static const unsigned int MAX_COMMANDS = 2;
     command comLine[MAX_COMMANDS + 1];
 
     /*
@@ -43,6 +43,21 @@ int main(int argc, char *argv[]) {
             exit(0);
         }
 
+        if(isInternal(comLine, numberOfCommands)){
+            /*
+             * Dispatch internal commands
+             */
+
+        } else {
+            /*
+             * Dispatch to external commands
+             */
+
+
+        }
+
+
+
 
 
         printf("number of commands: %d\n", numberOfCommands);
@@ -54,13 +69,9 @@ int main(int argc, char *argv[]) {
     }
 
 
-    /*
-     * Dispatch internal commands
-     */
 
-    /*
-     * Dispatch to external commands
-     */
+
+
 
     /*
      * Stop or kill current running processes
@@ -121,6 +132,59 @@ int flagInternalCommands(command comLine[MAX_COMMANDS + 1], int nCommands ){
     return 0;
 }
 
+/**
+ *
+ * isInternal
+ *
+ * This function returns true if there is a single command in the comLine struct array
+ * and if this command has an internal flag.
+ *
+ * If there is a single command in the comLine array but the internal flag is false, the
+ * function returns false.
+ *
+ * If the comLine array has several entries, the function exits.
+ *
+ * @param comLine
+ * @param nCommands
+ * @return
+ */
+bool isInternal (command comLine[MAX_COMMANDS + 1], int nCommands){
+    if (nCommands > 1 ){
+        fprintf(stdout, "piped command line entries can at the moment not contain internal commands\n");
+        exit(0);
+    } else {
+        if (comLine[0].argv[0]!=1){
+            return false;
+        }
+    }
+    return true;
+}
+
+
+/**
+ *
+ * processExternalCommands
+ *
+ * @param comLine
+ * @param nCommands
+ * @return
+ */
+int processExternalCommands(command comLine[MAX_COMMANDS +1], int nCommands){
+
+    for(int commandIndex = 0; commandIndex < nCommands; commandIndex++){
+        if(commandIndex != nCommands-1){
+            int fd[2];
+            if(pipe(fd)){
+                perror("pipe:");
+                exit(EXIT_FAILURE);
+            };
+        }
+
+    }
+
+
+    return 0;
+}
 
 /*
  *  below a draft of the main processing section according to the seminar
