@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
 int flagInternalCommands(command comLine[MAX_COMMANDS + 1], int nCommands ){
 
     int numberOfInternals = 2;
-    char *internalCommands[numberOfInternals];
+    const char *internalCommands[numberOfInternals];
 
     const char internal_cd[] = "cd";
     const char internal_echo[] = "echo";
@@ -153,7 +153,7 @@ bool isInternal (command comLine[MAX_COMMANDS + 1], int nCommands){
         fprintf(stdout, "piped command line entries can at the moment not contain internal commands\n");
         exit(0);
     } else {
-        if (comLine[0].argv[0]!=1){
+        if (comLine[0].internal != 1){
             return false;
         }
     }
