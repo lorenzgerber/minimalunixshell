@@ -1,16 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include "parser.h"
 #include "mish.h"
-#include <stdbool.h>
+#include "execute.h"
+
 
 #define MAX_LENGTH 1024
 #define MAX_COMMANDS 4
-#define STRCMP(a, R, b) strcmp(a, b) R 0
-
 
 int main(int argc, char *argv[]) {
 
@@ -43,7 +42,7 @@ int main(int argc, char *argv[]) {
             exit(0);
         }
 
-        if(isInternal(comLine, numberOfCommands)){
+        if(isInternal(comLine)){
             /*
              * Dispatch internal commands
              */
@@ -52,33 +51,23 @@ int main(int argc, char *argv[]) {
             /*
              * Dispatch to external commands
              */
-
+            if(processExternalCommands(comLine, numberOfCommands)<0){
+                fprintf(stderr, "External command execution failed\n");
+                exit(EXIT_FAILURE);
+            }
 
         }
 
-
-
-
-
+        /*
         printf("number of commands: %d\n", numberOfCommands);
         for(int commandLooper = 0; commandLooper < numberOfCommands; commandLooper++){
             printf("command name: %s\n", comLine[commandLooper].argv[0]);
             printf("number of args: %d\n", comLine[commandLooper].argc-1);
         }
+         */
+
 
     }
-
-
-
-
-
-
-    /*
-     * Stop or kill current running processes
-     */
-
-
-
 
 
     printf("hello world\n");
@@ -148,14 +137,9 @@ int flagInternalCommands(command comLine[MAX_COMMANDS + 1], int nCommands ){
  * @param nCommands
  * @return
  */
-bool isInternal (command comLine[MAX_COMMANDS + 1], int nCommands){
-    if (nCommands > 1 ){
-        fprintf(stdout, "piped command line entries can at the moment not contain internal commands\n");
-        exit(0);
-    } else {
-        if (comLine[0].internal != 1){
-            return false;
-        }
+bool isInternal (command comLine[MAX_COMMANDS + 1]){
+    if (comLine[0].internal != 1){
+        return false;
     }
     return true;
 }
@@ -172,12 +156,64 @@ bool isInternal (command comLine[MAX_COMMANDS + 1], int nCommands){
 int processExternalCommands(command comLine[MAX_COMMANDS +1], int nCommands){
 
     for(int commandIndex = 0; commandIndex < nCommands; commandIndex++){
-        if(commandIndex != nCommands-1){
-            int fd[2];
-            if(pipe(fd)){
+        if(commandIndex < nCommands-1){
+
+            int pipe1_fd[2];
+            int pipe2_fd[2];
+
+            if(pipe(pipe1_fd)){
                 perror("pipe:");
                 exit(EXIT_FAILURE);
             };
+            if(pipe(pipe2_fd)){
+                perror("pipe2:");
+                exit(EXIT_FAILURE);
+            }
+
+
+            pid_t pid;
+            pid = fork();
+            if(pid == -1){
+                perror("fork:");
+                exit(EXIT_FAILURE);
+            }
+            if(pid == 0){
+                //fprintf(stdout,"test test\n");
+                fprintf(stdout,"%s", comLine[commandIndex].argv[0]);
+                if(commandIndex > 0){
+                    // duplicate old read end to current read end
+                    // close unused ones
+                    dupPipe(pipe2_fd, READ_END,STDIN_FILENO);
+                }
+
+                if(commandIndex < nCommands - 1){
+                    // duplicate new write end to current write end
+                    // close unused one
+                    dupPipe(pipe1_fd,WRITE_END,STDOUT_FILENO);
+                }
+
+                //check for redirect
+
+
+                if(execvp(comLine[commandIndex].argv[0], comLine[commandIndex].argv)<0){
+                    perror("execvp:");
+                    exit(EXIT_FAILURE);
+                }
+                fprintf(stdout,"bullshit\n");
+
+            } else {
+                if(commandIndex > 0){
+                    // clean up
+                }
+                if(commandIndex < nCommands){
+                    // move file descriptor
+                }
+                if(nCommands > 1){
+                    // close all resources
+                }
+
+            }
+
         }
 
     }
@@ -185,29 +221,3 @@ int processExternalCommands(command comLine[MAX_COMMANDS +1], int nCommands){
 
     return 0;
 }
-
-/*
- *  below a draft of the main processing section according to the seminar
- *  
- *  for command in commandline
- *      if there is a next command
- *          pipe()
- *      fork()
- *      if child:
- *          if previous command exists:
- *              duplicate old read end to current read end
- *              close unused one
- *          if next command exists:
- *              duplicate new write end to current write end
- *              close unused one
- *          #redirects#
- *          execute command
- *      else:
- *          if previous command exists:
- *              clean up
- *          if next command exists:
- *              move file descriptor
- *          if multiple commands exist:
- *              close all resources
- *
- */

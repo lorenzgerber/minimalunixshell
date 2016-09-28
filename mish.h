@@ -14,4 +14,4 @@ int flagInternalCommands(command comLine[MAX_COMMANDS + 1], int nCommands );
 
 int processExternalCommands(command comLine[MAX_COMMANDS +1], int nCommands);
 
-bool isInternal (command comLine[MAX_COMMANDS + 1], int nCommands);
+bool isInternal (command comLine[MAX_COMMANDS + 1]);
