@@ -178,6 +178,8 @@ int processExternalCommands(command comLine[MAX_COMMANDS +1], int nCommands){
                 exit(EXIT_FAILURE);
             }
             if(pid == 0){
+                
+
                 //fprintf(stdout,"test test\n");
                 fprintf(stdout,"%s", comLine[commandIndex].argv[0]);
                 if(commandIndex > 0){
