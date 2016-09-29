@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "parser.h"
 #include "mish.h"
+#include <sys/param.h>
 #include "execute.h"
 
 
@@ -25,6 +26,7 @@ int main(int argc, char *argv[]) {
 
 
     while (1) {
+        sleep(1);
         printf("$ ");
         if (!fgets(line, MAX_LENGTH, stdin)) break;
 
@@ -51,10 +53,8 @@ int main(int argc, char *argv[]) {
             /*
              * Dispatch to external commands
              */
-            if(processExternalCommands(comLine, numberOfCommands)<0){
-                fprintf(stderr, "External command execution failed\n");
-                exit(EXIT_FAILURE);
-            }
+            processExternalCommands2(comLine, numberOfCommands);
+
 
         }
 
@@ -222,4 +222,78 @@ int processExternalCommands(command comLine[MAX_COMMANDS +1], int nCommands){
      */
 
     return 0;
+}
+
+int processExternalCommands2(command comLine[], int nCommands){
+
+    pid_t pid;
+    int in = 0;
+    int fd[2];
+
+
+    /*
+     * Loop over all commands
+     */
+    for(int commandIndex = 0; commandIndex < (nCommands -1); commandIndex++){
+
+
+
+        if(pipe(fd)){
+            perror("pipe:");
+            exit(EXIT_FAILURE);
+        };
+
+
+        /*
+         * spawn process
+         */
+        pid = fork();
+        if(pid == -1){
+            perror("fork:");
+            exit(EXIT_FAILURE);
+        }
+
+
+        if(pid == 0){
+            /*
+             * code run in the child process
+             */
+            if (in != 0){
+                dup2(in, 0);
+                close(in);
+            }
+
+            if (fd[WRITE_END] != 1){
+                dupPipe(fd, WRITE_END, 1);
+            }
+
+            return execvp (comLine[commandIndex].argv[0], comLine[commandIndex].argv );
+
+
+        } else {
+
+            close (fd[WRITE_END]);
+            in = fd[READ_END];
+
+        }
+
+    }
+
+
+
+    pid = fork();
+    if(pid == -1){
+        perror("fork:");
+        exit(EXIT_FAILURE);
+    }
+
+    if(pid == 0){
+        dup2(in, 0);
+        execvp(comLine[nCommands - 1].argv[0], comLine[nCommands - 1].argv);
+    }
+    
+
+
+    return 0;
+
 }
