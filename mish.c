@@ -155,71 +155,71 @@ bool isInternal (command comLine[MAX_COMMANDS + 1]){
  */
 int processExternalCommands(command comLine[MAX_COMMANDS +1], int nCommands){
 
-    for(int commandIndex = 0; commandIndex < nCommands; commandIndex++){
-        if(commandIndex < nCommands-1){
+    pid_t pid;
+    int fd[2];
 
-            int pipe1_fd[2];
-            int pipe2_fd[2];
+    /*
+     * Loop over all commands
+     */
+    for(int commandIndex = 0; commandIndex < (nCommands); commandIndex++){
 
-            if(pipe(pipe1_fd)){
+
+        // if there is a next command
+        if ( commandIndex < (nCommands - 1) ){
+            /*
+         * create a new pipe
+         */
+            if(pipe(fd)){
                 perror("pipe:");
                 exit(EXIT_FAILURE);
             };
-            if(pipe(pipe2_fd)){
-                perror("pipe2:");
-                exit(EXIT_FAILURE);
-            }
-
-
-            pid_t pid;
-            pid = fork();
-            if(pid == -1){
-                perror("fork:");
-                exit(EXIT_FAILURE);
-            }
-            if(pid == 0){
-                
-
-                //fprintf(stdout,"test test\n");
-                fprintf(stdout,"%s", comLine[commandIndex].argv[0]);
-                if(commandIndex > 0){
-                    // duplicate old read end to current read end
-                    // close unused ones
-                    dupPipe(pipe2_fd, READ_END,STDIN_FILENO);
-                }
-
-                if(commandIndex < nCommands - 1){
-                    // duplicate new write end to current write end
-                    // close unused one
-                    dupPipe(pipe1_fd,WRITE_END,STDOUT_FILENO);
-                }
-
-                //check for redirect
-
-
-                if(execvp(comLine[commandIndex].argv[0], comLine[commandIndex].argv)<0){
-                    perror("execvp:");
-                    exit(EXIT_FAILURE);
-                }
-                fprintf(stdout,"bullshit\n");
-
-            } else {
-                if(commandIndex > 0){
-                    // clean up
-                }
-                if(commandIndex < nCommands){
-                    // move file descriptor
-                }
-                if(nCommands > 1){
-                    // close all resources
-                }
-
-            }
-
         }
 
+        /*
+         * spawn process
+         */
+        pid = fork();
+        if(pid == -1){
+            perror("fork:");
+            exit(EXIT_FAILURE);
+        }
+
+
+        if(pid == 0){
+            /*
+             * code run in the child process
+             */
+            if (commandIndex != 0){
+                /*
+                 * Code run if this is not the first command
+                 */
+                fprintf(stdout, "I'm not the first command, index %d\n", commandIndex);
+                // need to get the
+
+            } else {
+                /*
+                 * Code Run if this is the first child
+                 */
+
+
+            }
+            fprintf(stdout, "child command: %s\n", comLine[commandIndex].argv[0]);
+            exit(0);
+
+        } else {
+            /*
+             * code run in the parent process
+             */
+
+            fprintf(stdout, "Parent command index %d\n", commandIndex);
+
+
+        }
     }
 
+    /*
+     * Code run after looping over all commands
+     */
 
     return 0;
 }
