@@ -26,8 +26,8 @@ int main(int argc, char *argv[]) {
 
 
     while (1) {
-        sleep(1);
-        printf("$ ");
+        //sleep(1);
+        printf("mish %% ");
         if (!fgets(line, MAX_LENGTH, stdin)) break;
 
         /*
@@ -291,6 +291,8 @@ int processExternalCommands2(command comLine[], int nCommands){
         dup2(in, 0);
         execvp(comLine[nCommands - 1].argv[0], comLine[nCommands - 1].argv);
     }
+    int status;
+    waitpid(pid, &status, WUNTRACED);
     
 
 

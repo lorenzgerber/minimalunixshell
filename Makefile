@@ -3,7 +3,7 @@ CFLAGS= -Wall -std=c11 -Wextra -Werror -Wmissing-declarations -Wmissing-prototyp
 
 all: mish
 
-mpasswdsort: mish.o execute.o parser.o
+mishx: mish.o execute.o parser.o
 	$(CC) -o mish mish.o execute.o parser.o
 
 mish.o execute.o parser.o: mish.c mish.h execute.c execute.h parser.c parser.h
