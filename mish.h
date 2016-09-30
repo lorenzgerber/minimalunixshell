@@ -9,7 +9,6 @@
 #define MAX_COMMANDS 4
 
 
-
 int flagInternalCommands(command comLine[MAX_COMMANDS + 1], int nCommands );
 
 int processExternalCommands(command comLine[MAX_COMMANDS +1], int nCommands);

@@ -12,7 +12,7 @@
 #define MAX_LENGTH 1024
 #define MAX_COMMANDS 4
 
-int main(int argc, char *argv[]) {
+int main(void) {
 
     /*
      * Initialize variables
