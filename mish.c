@@ -27,7 +27,8 @@ int main(void) {
 
     while (1) {
         //sleep(1);
-        printf("mish %% ");
+        fprintf(stderr, "mish %% ");
+        fflush(stderr);
         if (!fgets(line, MAX_LENGTH, stdin)) break;
 
         /*
@@ -68,9 +69,7 @@ int main(void) {
 
 
     }
-
-
-    printf("hello world\n");
+    
     return 0;
 }
 

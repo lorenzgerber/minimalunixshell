@@ -34,10 +34,20 @@ int dupPipe(int pip[2], int end, int destfd){
  * Returns:	-1 on error, else destfd
  */
 int redirect(char *filename, int flags, int destfd){
-    char *test = filename;
-    int testflags = flags;
-    int testdestfd  = destfd;
-    printf("%s %d %d", test, testflags, testdestfd);
+
+
+    FILE *file;
+
+
+    if (flags){
+        file = fopen(filename, "r");
+
+    } else {
+        file = fopen(filename, "a");
+
+    }
+
+    printf("%d %d", fgetc(file), destfd);
 
     return 0;
 }
