@@ -5,6 +5,7 @@
 #include "execute.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 
 /* Duplicate a pipe to a standard I/O file descriptor, and close both pipe ends
@@ -53,14 +54,21 @@ int redirect(char *filename, int flags, int destfd){
 
 
     } else {
-        int fdw = open(filename, O_WRONLY | O_CREAT | O_EXCL, S_IRWXU );
-        if (fdw<0){
-            perror(filename);
+
+        if(access(filename, W_OK)==0){
+            errno = EEXIST;
+            perror("write redirect");
+        } else {
+            int fdw = open(filename, O_WRONLY | O_CREAT | O_EXCL, S_IRWXU );
+            if (fdw<0){
+                perror(filename);
+            }
+
+            if(dup2(fdw, destfd) < 0){
+                perror("dup2");
+            }
         }
 
-        if(dup2(fdw, destfd) < 0){
-            perror("dup2");
-        }
 
     }
 

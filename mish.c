@@ -13,8 +13,6 @@
 
 #define MAX_LENGTH 1024
 #define MAX_COMMANDS 4
-#define MAX_LINESIZE 1000
-
 
 int main(void) {
 
@@ -30,8 +28,7 @@ int main(void) {
 
 
     while (1) {
-        //sleep(1);
-        fprintf(stderr, "\nmish %% ");
+        fprintf(stderr, "mish %% ");
         fflush(stderr);
         if (!fgets(line, MAX_LENGTH, stdin)) break;
 
@@ -54,24 +51,33 @@ int main(void) {
              * Dispatch internal commands
              */
 
+            /*
+             * cd
+             */
+            if(strcmp(comLine[0].argv[0],"cd")==0){
+                if(chdir(comLine[0].argv[1])!=0){
+                    perror("chdir:");
+                }
+            }
+                /*
+                 * echo
+                 */
+            else if(strcmp(comLine[0].argv[0],"echo")==0){
+                for(int i = 1; i < comLine[0].argc ; i++){
+                    fprintf(stdout, "%s", comLine[0].argv[i]);
+                    if(i < comLine[0].argc - 1){
+                        fprintf(stdout, " ");
+                    };
+                }
+                fprintf(stdout,"\n");
+            }
+
         } else {
             /*
              * Dispatch to external commands
              */
             processExternalCommands(comLine, numberOfCommands);
-
-
         }
-
-        /*
-        printf("number of commands: %d\n", numberOfCommands);
-        for(int commandLooper = 0; commandLooper < numberOfCommands; commandLooper++){
-            printf("command name: %s\n", comLine[commandLooper].argv[0]);
-            printf("number of args: %d\n", comLine[commandLooper].argc-1);
-        }
-         */
-
-
     }
     
     return 0;
@@ -161,15 +167,10 @@ int processExternalCommands(command comLine[], int nCommands){
      */
     for(int commandIndex = 0; commandIndex < (nCommands -1); commandIndex++){
 
-
-
         if(pipe(fd)){
             perror("pipe:");
             exit(EXIT_FAILURE);
         };
-
-
-
 
         /*
          * spawn process
@@ -180,8 +181,8 @@ int processExternalCommands(command comLine[], int nCommands){
             exit(EXIT_FAILURE);
         }
 
-
         if(pid == 0){
+
             /*
              * code run in the child process
              */
@@ -189,7 +190,6 @@ int processExternalCommands(command comLine[], int nCommands){
             if(commandIndex == 0 && comLine[0].infile != NULL){
                 redirect(comLine[0].infile,0,READ_END);
             }
-
 
             if (in != 0){
                 dup2(in, 0);
@@ -200,8 +200,10 @@ int processExternalCommands(command comLine[], int nCommands){
                 dupPipe(fd, WRITE_END, 1);
             }
 
-            return execvp (comLine[commandIndex].argv[0], comLine[commandIndex].argv );
-
+            if(execvp (comLine[commandIndex].argv[0], comLine[commandIndex].argv )<0){
+                perror("execvp");
+                exit(EXIT_FAILURE);
+            }
 
         } else {
 
@@ -211,8 +213,6 @@ int processExternalCommands(command comLine[], int nCommands){
         }
 
     }
-
-
 
     pid = fork();
     if(pid == -1){
@@ -230,8 +230,13 @@ int processExternalCommands(command comLine[], int nCommands){
             redirect(comLine[nCommands-1].outfile,1,WRITE_END);
         }
 
-        dup2(in, 0);
-        execvp(comLine[nCommands - 1].argv[0], comLine[nCommands - 1].argv);
+        if(dup2(in, 0)<0){
+            perror("dup2");
+        }
+        if(execvp(comLine[nCommands - 1].argv[0], comLine[nCommands - 1].argv)<0){
+            perror("execvp");
+            exit(EXIT_FAILURE);
+        };
     }
 
     int status;
