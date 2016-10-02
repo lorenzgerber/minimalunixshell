@@ -6,11 +6,15 @@
 #include "parser.h"
 #include "mish.h"
 #include <sys/param.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "execute.h"
 
 
 #define MAX_LENGTH 1024
 #define MAX_COMMANDS 4
+#define MAX_LINESIZE 1000
+
 
 int main(void) {
 
@@ -27,7 +31,7 @@ int main(void) {
 
     while (1) {
         //sleep(1);
-        fprintf(stderr, "mish %% ");
+        fprintf(stderr, "\nmish %% ");
         fflush(stderr);
         if (!fgets(line, MAX_LENGTH, stdin)) break;
 
@@ -54,7 +58,7 @@ int main(void) {
             /*
              * Dispatch to external commands
              */
-            processExternalCommands2(comLine, numberOfCommands);
+            processExternalCommands(comLine, numberOfCommands);
 
 
         }
@@ -144,90 +148,12 @@ bool isInternal (command comLine[MAX_COMMANDS + 1]){
 }
 
 
-/**
- *
- * processExternalCommands
- *
- * @param comLine
- * @param nCommands
- * @return
- */
-int processExternalCommands(command comLine[MAX_COMMANDS +1], int nCommands){
-
-    pid_t pid;
-    int fd[2];
-
-    /*
-     * Loop over all commands
-     */
-    for(int commandIndex = 0; commandIndex < (nCommands); commandIndex++){
-
-
-        // if there is a next command
-        if ( commandIndex < (nCommands - 1) ){
-            /*
-         * create a new pipe
-         */
-            if(pipe(fd)){
-                perror("pipe:");
-                exit(EXIT_FAILURE);
-            };
-        }
-
-        /*
-         * spawn process
-         */
-        pid = fork();
-        if(pid == -1){
-            perror("fork:");
-            exit(EXIT_FAILURE);
-        }
-
-
-        if(pid == 0){
-            /*
-             * code run in the child process
-             */
-            if (commandIndex != 0){
-                /*
-                 * Code run if this is not the first command
-                 */
-                fprintf(stdout, "I'm not the first command, index %d\n", commandIndex);
-                // need to get the
-
-            } else {
-                /*
-                 * Code Run if this is the first child
-                 */
-
-
-            }
-            fprintf(stdout, "child command: %s\n", comLine[commandIndex].argv[0]);
-            exit(0);
-
-        } else {
-            /*
-             * code run in the parent process
-             */
-
-            fprintf(stdout, "Parent command index %d\n", commandIndex);
-
-
-        }
-    }
-
-    /*
-     * Code run after looping over all commands
-     */
-
-    return 0;
-}
-
-int processExternalCommands2(command comLine[], int nCommands){
+int processExternalCommands(command comLine[], int nCommands){
 
     pid_t pid;
     int in = 0;
     int fd[2];
+
 
 
     /*
@@ -243,6 +169,8 @@ int processExternalCommands2(command comLine[], int nCommands){
         };
 
 
+
+
         /*
          * spawn process
          */
@@ -257,6 +185,12 @@ int processExternalCommands2(command comLine[], int nCommands){
             /*
              * code run in the child process
              */
+
+            if(commandIndex == 0 && comLine[0].infile != NULL){
+                redirect(comLine[0].infile,0,READ_END);
+            }
+
+
             if (in != 0){
                 dup2(in, 0);
                 close(in);
@@ -287,9 +221,19 @@ int processExternalCommands2(command comLine[], int nCommands){
     }
 
     if(pid == 0){
+
+        if(nCommands == 1 &&  comLine[0].infile != NULL){
+            redirect(comLine[0].infile,0, READ_END);
+        }
+
+        if(comLine[nCommands-1].outfile != NULL){
+            redirect(comLine[nCommands-1].outfile,1,WRITE_END);
+        }
+
         dup2(in, 0);
         execvp(comLine[nCommands - 1].argv[0], comLine[nCommands - 1].argv);
     }
+
     int status;
     waitpid(pid, &status, WUNTRACED);
     

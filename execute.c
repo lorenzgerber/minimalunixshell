@@ -1,7 +1,10 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include "execute.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 
 
 /* Duplicate a pipe to a standard I/O file descriptor, and close both pipe ends
@@ -36,18 +39,31 @@ int dupPipe(int pip[2], int end, int destfd){
 int redirect(char *filename, int flags, int destfd){
 
 
-    FILE *file;
+    if (flags==0){
+        int fdr = open (filename, O_RDONLY);
+        if (fdr<0){
+            perror(filename);
+        }
+
+        if(dup2(fdr, destfd) < 0){
+            perror("dup2");
+        };
 
 
-    if (flags){
-        file = fopen(filename, "r");
+
 
     } else {
-        file = fopen(filename, "a");
+        int fdw = open(filename, O_WRONLY | O_CREAT | O_EXCL, S_IRWXU );
+        if (fdw<0){
+            perror(filename);
+        }
+
+        if(dup2(fdw, destfd) < 0){
+            perror("dup2");
+        }
 
     }
 
-    printf("%d %d", fgetc(file), destfd);
 
     return 0;
 }
