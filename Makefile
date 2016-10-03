@@ -3,11 +3,11 @@ CFLAGS= -Wall -std=c11 -Wextra -Werror -Wmissing-declarations -Wmissing-prototyp
 
 all: mish
 
-mish: mish.o execute.o parser.o
-	$(CC) $(CFLAGS) -o mish mish.o execute.o parser.o
+mish: mish.o execute.o parser.o sighant.o
+	$(CC) $(CFLAGS) -o mish sighant.o execute.o parser.o mish.o
 
-mish.o execute.o parser.o: mish.c mish.h execute.c execute.h parser.c parser.h
-	$(CC) $(CFLAGS) -c -g mish.c execute.c parser.c
+mish.o execute.o parser.o: sighant.c sighant.h parser.c parser.h execute.c execute.h mish.c mish.h
+	$(CC) $(CFLAGS) -c -g sighant.c parser.c execute.c mish.c
 
 clean:
 	 rm -f rm mish *.o

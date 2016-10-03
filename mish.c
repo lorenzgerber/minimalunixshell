@@ -1,15 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include "parser.h"
 #include "mish.h"
-#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include "execute.h"
-#include <signal.h>
+#include "sighant.h"
 
 
 #define MAX_LENGTH 1024
@@ -17,12 +7,17 @@
 
 void sigCatcherINT(int);
 
+int pidArray[MAX_COMMANDS];
+
 int main(void) {
 
-    if (signal(SIGINT, sigCatcherINT) == SIG_ERR) {
-        fprintf(stderr, "Couldn't register signal handler\n");
-        perror("signal");
-    }
+
+
+    /*
+     * Keep track of child pids for kill command
+     */
+
+
 
 
     /*
@@ -34,6 +29,7 @@ int main(void) {
      * Produce Prompt
      */
     char line[MAX_LENGTH];
+
 
 
     while (1) {
@@ -171,6 +167,18 @@ int processExternalCommands(command comLine[], int nCommands){
 
 
 
+    int pidCount = 0;
+
+
+    if (signal(SIGINT, sigCatcherINT) == SIG_ERR) {
+        fprintf(stderr, "Couldn't register signal handler\n");
+        perror("signal");
+        exit(EXIT_FAILURE);
+    }
+
+
+
+
     /*
      * Loop over all commands
      */
@@ -189,6 +197,10 @@ int processExternalCommands(command comLine[], int nCommands){
             perror("fork:");
             exit(EXIT_FAILURE);
         }
+
+        pidArray[pidCount] = pid;
+        pidCount++;
+
 
         if(pid == 0){
 
@@ -229,6 +241,8 @@ int processExternalCommands(command comLine[], int nCommands){
         exit(EXIT_FAILURE);
     }
 
+    pidArray[pidCount] = pid;
+
     if(pid == 0){
 
         if(nCommands == 1 &&  comLine[0].infile != NULL){
@@ -248,11 +262,6 @@ int processExternalCommands(command comLine[], int nCommands){
         };
     }
 
-    if (signal(SIGINT, sigCatcherINT) == SIG_ERR) {
-        fprintf(stderr, "Couldn't register signal handler\n");
-        perror("signal");
-        exit(1);
-    }
 
     int status;
     waitpid(pid, &status, WUNTRACED);
@@ -263,6 +272,5 @@ int processExternalCommands(command comLine[], int nCommands){
 
 }
 
-void sigCatcherINT( int theSignal ) {
-    sleep(theSignal);
-}
+
+
