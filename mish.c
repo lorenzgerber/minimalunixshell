@@ -9,12 +9,21 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "execute.h"
+#include <signal.h>
 
 
 #define MAX_LENGTH 1024
 #define MAX_COMMANDS 4
 
+void sigCatcherINT(int);
+
 int main(void) {
+
+    if (signal(SIGINT, sigCatcherINT) == SIG_ERR) {
+        fprintf(stderr, "Couldn't register signal handler\n");
+        perror("signal");
+    }
+
 
     /*
      * Initialize variables
@@ -239,6 +248,12 @@ int processExternalCommands(command comLine[], int nCommands){
         };
     }
 
+    if (signal(SIGINT, sigCatcherINT) == SIG_ERR) {
+        fprintf(stderr, "Couldn't register signal handler\n");
+        perror("signal");
+        exit(1);
+    }
+
     int status;
     waitpid(pid, &status, WUNTRACED);
     
@@ -246,4 +261,8 @@ int processExternalCommands(command comLine[], int nCommands){
 
     return 0;
 
+}
+
+void sigCatcherINT( int theSignal ) {
+    sleep(theSignal);
 }
