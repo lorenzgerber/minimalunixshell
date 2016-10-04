@@ -33,9 +33,19 @@ int main(void) {
 
 
     while (1) {
+        sigset_t newmask, oldmask;
+        sigemptyset(&newmask);
+        sigaddset(&newmask, SIGINT);
+        if (sigprocmask(SIG_BLOCK, &newmask, &oldmask)<0)
+            perror("SIG_BLOCK");
+
         fprintf(stderr, "mish %% ");
         fflush(stderr);
         if (!fgets(line, MAX_LENGTH, stdin)) break;
+
+        if (sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0)
+            perror("SIG_SETMASK");
+
 
         /*
          * Parse
@@ -170,11 +180,18 @@ int processExternalCommands(command comLine[], int nCommands){
     int pidCount = 0;
 
 
+    /*
     if (signal(SIGINT, sigCatcherINT) == SIG_ERR) {
         fprintf(stderr, "Couldn't register signal handler\n");
         perror("signal");
         exit(EXIT_FAILURE);
-    }
+    }*/
+
+    if(mysignal(SIGINT, sigCatcherINT) == SIG_ERR){
+        fprintf(stderr, "Couldn't register signal handler\n");
+        perror("signal");
+        exit(EXIT_FAILURE);
+    };
 
 
 

@@ -1,8 +1,7 @@
-
+#include <signal.h>
 #include "parser.h"
 #include "execute.h"
 #include <sys/types.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
