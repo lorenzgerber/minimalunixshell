@@ -33,19 +33,29 @@ int main(void) {
 
 
     while (1) {
+        /*
         sigset_t newmask, oldmask;
         sigemptyset(&newmask);
         sigaddset(&newmask, SIGINT);
         if (sigprocmask(SIG_BLOCK, &newmask, &oldmask)<0)
             perror("SIG_BLOCK");
+        */
+
+        mysignal(SIGINT, SIG_IGN);
 
         fprintf(stderr, "mish %% ");
         fflush(stderr);
-        if (!fgets(line, MAX_LENGTH, stdin)) break;
+        if (!fgets(line, MAX_LENGTH, stdin)){
+          fprintf(stderr,"\n");
+            break;
+        }
+
+        /*
 
         if (sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0)
             perror("SIG_SETMASK");
 
+         */
 
         /*
          * Parse
@@ -227,6 +237,8 @@ int processExternalCommands(command comLine[], int nCommands){
 
             if(commandIndex == 0 && comLine[0].infile != NULL){
                 redirect(comLine[0].infile,0,READ_END);
+            } else {
+                close(fd[READ_END]);
             }
 
             if (in != 0){
@@ -237,6 +249,9 @@ int processExternalCommands(command comLine[], int nCommands){
             if (fd[WRITE_END] != 1){
                 dupPipe(fd, WRITE_END, 1);
             }
+
+
+
 
             if(execvp (comLine[commandIndex].argv[0], comLine[commandIndex].argv )<0){
                 perror("execvp");
