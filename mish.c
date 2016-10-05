@@ -11,15 +11,6 @@ int pidArray[MAX_COMMANDS];
 
 int main(void) {
 
-
-
-    /*
-     * Keep track of child pids for kill command
-     */
-
-
-
-
     /*
      * Initialize variables
      */
@@ -30,10 +21,7 @@ int main(void) {
      */
     char line[MAX_LENGTH];
 
-
-
     while (1) {
-
 
         mysignal(SIGINT, SIG_IGN);
 
@@ -85,9 +73,7 @@ int main(void) {
             }
 
         } else {
-            /*
-             * Dispatch to external commands
-             */
+
             processExternalCommands(comLine, numberOfCommands);
         }
     }
@@ -171,6 +157,7 @@ int processExternalCommands(command comLine[], int nCommands){
     pid_t pid;
     int in = 0;
     int fd[2];
+    int status;
 
 
 
@@ -190,18 +177,16 @@ int processExternalCommands(command comLine[], int nCommands){
      */
     for(int commandIndex = 0; commandIndex < (nCommands -1); commandIndex++){
 
-
         if(pipe(fd)){
             perror("pipe:");
             exit(EXIT_FAILURE);
         };
 
-        fprintf(stderr,"after pipe\nfd[0]: %d, fd[1]: %d, in: %d \n", fd[0], fd[1], in);
-
         /*
          * spawn process
          */
         pid = fork();
+
         if(pid == -1){
             perror("fork:");
             exit(EXIT_FAILURE);
@@ -210,14 +195,11 @@ int processExternalCommands(command comLine[], int nCommands){
         pidArray[pidCount] = pid;
         pidCount++;
 
-
         if(pid == 0){
 
             /*
              * code run in the child process
              */
-
-
             if(commandIndex == 0 && comLine[0].infile != NULL){
                 redirect(comLine[0].infile,0,READ_END);
             } else {
@@ -233,9 +215,6 @@ int processExternalCommands(command comLine[], int nCommands){
                 dupPipe(fd, WRITE_END, 1);
             }
 
-
-
-
             if(execvp (comLine[commandIndex].argv[0], comLine[commandIndex].argv )<0){
                 perror("execvp");
                 exit(EXIT_FAILURE);
@@ -244,19 +223,13 @@ int processExternalCommands(command comLine[], int nCommands){
         } else {
             if (commandIndex < (nCommands - 1) && in != 0 ){
                 close(in);
-                in = fd[READ_END];
-            } else {
-                in = fd[READ_END];
             }
+            in = fd[READ_END];
 
             close (fd[WRITE_END]);
-
-
-
         }
 
     }
-
 
     pid = fork();
     if(pid == -1){
@@ -268,35 +241,32 @@ int processExternalCommands(command comLine[], int nCommands){
 
     if(pid == 0){
 
-
-
         if(nCommands == 1 &&  comLine[0].infile != NULL){
             redirect(comLine[0].infile,0, READ_END);
         }
-
 
         if(comLine[nCommands-1].outfile != NULL){
             redirect(comLine[nCommands-1].outfile,1,WRITE_END);
         }
 
+        if(nCommands != 1 ){
+            dupPipe(fd, READ_END, 0);
+        }
 
 
-        dupPipe(fd, READ_END, 0);
-
-        
         if(execvp(comLine[nCommands - 1].argv[0], comLine[nCommands - 1].argv)<0){
             perror("execvp");
             exit(EXIT_FAILURE);
         };
     }
 
-
-    int status;
-    waitpid(pid, &status, WUNTRACED);
-    fprintf(stderr,"end\nfd[0]: %d, fd[1]: %d, in: %d \n", fd[0], fd[1], in);
+    for(int currentPid = 0; currentPid<MAX_COMMANDS; currentPid++){
+        if (pidArray[currentPid]!=0){
+            waitpid(pidArray[currentPid], &status,WUNTRACED);
+        }
+    }
     close(fd[0]);
     close(fd[1]);
-
 
     return 0;
 
