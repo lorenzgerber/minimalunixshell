@@ -3,7 +3,7 @@
 
 
 #define MAX_LENGTH 1024
-#define MAX_COMMANDS 4
+
 
 void sigCatcherINT(int);
 
@@ -44,7 +44,6 @@ int main(void) {
             break;
         }
 
-        /*
         /*
          * Parse
          */
@@ -215,6 +214,7 @@ int processExternalCommands(command comLine[], int nCommands){
              * code run in the child process
              */
 
+
             if(commandIndex == 0 && comLine[0].infile != NULL){
                 redirect(comLine[0].infile,0,READ_END);
             } else {
@@ -277,7 +277,7 @@ int processExternalCommands(command comLine[], int nCommands){
 
     int status;
     waitpid(pid, &status, WUNTRACED);
-    
+    fprintf(stderr,"%d %d %d \n", fd[0], fd[1], in);
 
 
     return 0;

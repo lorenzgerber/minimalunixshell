@@ -11,7 +11,7 @@
 
 
 #define MAX_LENGTH 1024
-#define MAX_COMMANDS 4
+#define MAX_COMMANDS 8
 
 extern int pidArray[MAX_COMMANDS];
 

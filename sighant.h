@@ -1,6 +1,6 @@
 #include <sys/types.h>
 #include <signal.h>
-#define MAX_COMMANDS 4
+#define MAX_COMMANDS 8
 
 typedef	void	Sigfunc(int);
 
