@@ -32,7 +32,10 @@ int main(void) {
         mysignal(SIGINT, SIG_IGN);
 
         fprintf(stderr, "mish %% ");
-        fflush(stderr);
+        if(fflush(stderr)<0){
+            perror("fflush");
+            exit(EXIT_FAILURE);
+        }
         if (!fgets(line, MAX_LENGTH, stdin)){
           fprintf(stderr,"\n");
             break;
@@ -79,7 +82,6 @@ int main(void) {
             }
 
         } else {
-
             processExternalCommands(comLine, numberOfCommands);
         }
     }
@@ -176,6 +178,7 @@ int processExternalCommands(command comLine[], int nCommands){
     int in = 0;
     int fd[2];
     int status;
+    int redir = 0;
 
 
 
@@ -220,13 +223,20 @@ int processExternalCommands(command comLine[], int nCommands){
              */
             if(commandIndex == 0 && comLine[0].infile != NULL){
                 redirect(comLine[0].infile,0,READ_END);
+                redir = 1;
             } else {
-                close(fd[READ_END]);
+                if(close(fd[READ_END])<0){
+                    perror("close fd[READ_END]");
+                }
+
             }
 
             if (in != 0){
                 dup2(in, 0);
-                close(in);
+                if(close(in)<0){
+                    perror("close in, child proc");
+                }
+
             }
 
             if (fd[WRITE_END] != 1){
@@ -241,11 +251,15 @@ int processExternalCommands(command comLine[], int nCommands){
 
         } else {
             if (commandIndex < (nCommands - 1) && in != 0 ){
-                close(in);
+                if(close(in)<0){
+                    perror("close in, parent proc");
+                }
             }
             in = fd[READ_END];
 
-            close (fd[WRITE_END]);
+            if(close(fd[WRITE_END])<0){
+                perror("close fd[WRITE_END]");
+            }
         }
 
     }
@@ -262,6 +276,7 @@ int processExternalCommands(command comLine[], int nCommands){
 
         if(nCommands == 1 &&  comLine[0].infile != NULL){
             redirect(comLine[0].infile,0, READ_END);
+            redir = 1;
         }
 
         if(comLine[nCommands-1].outfile != NULL){
@@ -288,8 +303,13 @@ int processExternalCommands(command comLine[], int nCommands){
             waitpid(pidArray[currentPid], &status,WUNTRACED);
         }
     }
-    close(fd[0]);
-    close(fd[1]);
+    
+    if(redir != 1 && nCommands > 2 ){
+        if(close(fd[0])<0){
+            perror("close fd[0]");
+        }
+    }
+
 
     return 0;
 
