@@ -190,10 +190,13 @@ int processExternalCommands(command comLine[], int nCommands){
      */
     for(int commandIndex = 0; commandIndex < (nCommands -1); commandIndex++){
 
+
         if(pipe(fd)){
             perror("pipe:");
             exit(EXIT_FAILURE);
         };
+
+        fprintf(stderr,"after pipe\nfd[0]: %d, fd[1]: %d, in: %d \n", fd[0], fd[1], in);
 
         /*
          * spawn process
@@ -239,13 +242,21 @@ int processExternalCommands(command comLine[], int nCommands){
             }
 
         } else {
+            if (commandIndex < (nCommands - 1) && in != 0 ){
+                close(in);
+                in = fd[READ_END];
+            } else {
+                in = fd[READ_END];
+            }
 
             close (fd[WRITE_END]);
-            in = fd[READ_END];
+
+
 
         }
 
     }
+
 
     pid = fork();
     if(pid == -1){
@@ -257,17 +268,22 @@ int processExternalCommands(command comLine[], int nCommands){
 
     if(pid == 0){
 
+
+
         if(nCommands == 1 &&  comLine[0].infile != NULL){
             redirect(comLine[0].infile,0, READ_END);
         }
+
 
         if(comLine[nCommands-1].outfile != NULL){
             redirect(comLine[nCommands-1].outfile,1,WRITE_END);
         }
 
-        if(dup2(in, 0)<0){
-            perror("dup2");
-        }
+
+
+        dupPipe(fd, READ_END, 0);
+
+        
         if(execvp(comLine[nCommands - 1].argv[0], comLine[nCommands - 1].argv)<0){
             perror("execvp");
             exit(EXIT_FAILURE);
@@ -277,7 +293,9 @@ int processExternalCommands(command comLine[], int nCommands){
 
     int status;
     waitpid(pid, &status, WUNTRACED);
-    fprintf(stderr,"%d %d %d \n", fd[0], fd[1], in);
+    fprintf(stderr,"end\nfd[0]: %d, fd[1]: %d, in: %d \n", fd[0], fd[1], in);
+    close(fd[0]);
+    close(fd[1]);
 
 
     return 0;
