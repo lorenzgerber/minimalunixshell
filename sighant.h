@@ -1,3 +1,9 @@
+/**
+ * sighant.h
+ * Lorenz Gerber
+ * Assignment 3 5DV088 HT16
+ * Header file for the signal handling in mish.
+ */
 #include <sys/types.h>
 #include <signal.h>
 #define MAX_COMMANDS 8

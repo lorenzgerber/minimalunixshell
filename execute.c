@@ -1,3 +1,12 @@
+/**
+ * execute.c
+ * Lorenz Gerber
+ * Assignment 3 5DV088 HT16
+ *
+ * This file contains the functions dupPipe and redirect which are
+ * used with streams. dupPipe is a combination of dup2 and close while
+ * redirect uses just dup2.
+ */
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,7 +41,8 @@ int dupPipe(int pip[2], int end, int destfd){
  * Arguments:	filename	the file to/from which the standard I/O file
  * 				descriptor should be redirected
  * 		flags	indicates whether the file should be opened for reading
- * 			or writing
+ * 			or writing. 0 -> redirect input from file, 1 -> redirect
+ * 			output to file.
  * 		destfd	the standard I/O file descriptor which shall be
  *			redirected
  * Returns:	-1 on error, else destfd

@@ -1,3 +1,10 @@
+/**
+ * mish.h
+ * Lorenz Gerber
+ * Assignment 3 5DV088 HT16
+ * Header file for the main file of mish - a
+ * minimal shell implementation
+ */
 #include <signal.h>
 #include "parser.h"
 #include "execute.h"

@@ -1,3 +1,9 @@
+/**
+ * sighant.c
+ * Lorenz Gerber
+ * Assignment 3 5DV088 HT16
+ * This file contains the implementation of the signal handling.
+ */
 #include "sighant.h"
 #include "mish.h"
 

@@ -1,9 +1,15 @@
+/**
+ * mish.c
+ * Lorenz Gerber
+ * Assignment 3 5DV088 HT16
+ * The main file of the mish project - a
+ * minimal shell implementation.
+ *
+ */
 #include "mish.h"
 #include "sighant.h"
 
-
 #define MAX_LENGTH 1024
-
 
 void sigCatcherINT(int);
 
@@ -151,7 +157,17 @@ bool isInternal (command comLine[MAX_COMMANDS + 1]){
     return true;
 }
 
-
+/**
+ * ProcessExtenalCommands
+ *
+ * The function that spawns new processes and executes the commands.
+ * An implementation where one pipe after the other is created was
+ * chosen.
+ *
+ * @param comLine struct from parser.h
+ * @param nCommands number of commands
+ * @return returns 0 if everything fine
+ */
 int processExternalCommands(command comLine[], int nCommands){
 
     pid_t pid;
@@ -260,6 +276,9 @@ int processExternalCommands(command comLine[], int nCommands){
         };
     }
 
+    /*
+     * wait for the status of the child processes
+     */
     for(int currentPid = 0; currentPid<MAX_COMMANDS; currentPid++){
         if (pidArray[currentPid]!=0){
             waitpid(pidArray[currentPid], &status,WUNTRACED);
