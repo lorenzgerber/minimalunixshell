@@ -18,9 +18,7 @@ void sigCatcherINT( int theSignal ) {
 }
 
 
-Sigfunc *
-mysignal(int signo, Sigfunc *func)
-{
+Sigfunc * mysignal(int signo, Sigfunc *func) {
     struct sigaction	act, oact;
 
     act.sa_handler = func;
