@@ -116,8 +116,10 @@ int flagInternalCommands(command comLine[MAX_COMMANDS + 1], int nCommands ){
 
     for (int commandLooper = 0; commandLooper < nCommands; commandLooper++){
         int internal = false;
-        for(int internalLooper = 0; internalLooper < numberOfInternals; internalLooper++){
-            if(strcmp(comLine[commandLooper].argv[0], internalCommands[internalLooper]) == 0){
+        for(int internalLooper = 0; internalLooper < numberOfInternals;
+            internalLooper++){
+            if(strcmp(comLine[commandLooper].argv[0],
+                      internalCommands[internalLooper]) == 0){
                 internal = true;
                 anyInternal = true;
             }
@@ -138,11 +140,11 @@ int flagInternalCommands(command comLine[MAX_COMMANDS + 1], int nCommands ){
  *
  * isInternal
  *
- * This function returns true if there is a single command in the comLine struct array
- * and if this command has an internal flag.
+ * This function returns true if there is a single command in the comLine
+ * struct array and if this command has an internal flag.
  *
- * If there is a single command in the comLine array but the internal flag is false, the
- * function returns false.
+ * If there is a single command in the comLine array but the internal flag
+ * is false, the function returns false.
  *
  * If the comLine array has several entries, the function exits.
  *
@@ -231,7 +233,8 @@ int processExternalCommands(command comLine[], int nCommands){
                 dupPipe(fd, WRITE_END, 1);
             }
 
-            if(execvp (comLine[commandIndex].argv[0], comLine[commandIndex].argv )<0){
+            if(execvp (comLine[commandIndex].argv[0],
+                       comLine[commandIndex].argv )<0){
                 perror("execvp");
                 exit(EXIT_FAILURE);
             }
@@ -270,7 +273,8 @@ int processExternalCommands(command comLine[], int nCommands){
         }
 
 
-        if(execvp(comLine[nCommands - 1].argv[0], comLine[nCommands - 1].argv)<0){
+        if(execvp(comLine[nCommands - 1].argv[0],
+                  comLine[nCommands - 1].argv)<0){
             perror("execvp");
             exit(EXIT_FAILURE);
         };
