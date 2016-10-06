@@ -245,7 +245,7 @@ int processExternalCommands(command comLine[], int nCommands){
 
             if(execvp (comLine[commandIndex].argv[0],
                        comLine[commandIndex].argv )<0){
-                perror("execvp");
+                perror("mish");
                 exit(EXIT_FAILURE);
             }
 
@@ -290,7 +290,7 @@ int processExternalCommands(command comLine[], int nCommands){
 
         if(execvp(comLine[nCommands - 1].argv[0],
                   comLine[nCommands - 1].argv)<0){
-            perror("execvp");
+            perror("mish");
             exit(EXIT_FAILURE);
         };
     }
