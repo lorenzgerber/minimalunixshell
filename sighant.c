@@ -4,12 +4,9 @@
  * Assignment 3 5DV088 HT16
  * This file contains the implementation of the signal handling.
  */
+#define _POSIX_C_SOURCE 200809L
 #include "sighant.h"
 #include "mish.h"
-
-
-int kill(pid_t pid, int sig);
-
 
 void sigCatcherINT( int theSignal ) {
     
