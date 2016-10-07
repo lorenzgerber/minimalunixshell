@@ -29,7 +29,7 @@ int main(void) {
 
     while (1) {
 
-        mysignal(SIGINT, SIG_IGN);
+        mySignal(SIGINT, SIG_IGN);
 
         fprintf(stderr, "mish %% ");
         if(fflush(stderr)<0){
@@ -184,7 +184,7 @@ int processExternalCommands(command comLine[], int nCommands){
 
     int pidCount = 0;
 
-    if(mysignal(SIGINT, sigCatcherINT) == SIG_ERR){
+    if(mySignal(SIGINT, sigCatcherINT) == SIG_ERR){
         fprintf(stderr, "Couldn't register signal handler\n");
         perror("signal");
         exit(EXIT_FAILURE);

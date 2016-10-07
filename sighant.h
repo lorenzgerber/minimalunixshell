@@ -13,4 +13,4 @@ int kill(pid_t pid, int sig);
 
 void sigCatcherINT( int theSignal );
 
-Sigfunc* mysignal(int signo, Sigfunc *func);
+Sigfunc* mySignal(int signo, Sigfunc *func);
