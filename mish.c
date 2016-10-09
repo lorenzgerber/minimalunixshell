@@ -315,6 +315,3 @@ int processExternalCommands(command comLine[], int nCommands){
     return 0;
 
 }
-
-
-
