@@ -65,7 +65,8 @@ int main(void) {
              */
             if(strcmp(comLine[0].argv[0],"cd")==0){
                 if(chdir(comLine[0].argv[1])!=0){
-                    perror("chdir:");
+                    fprintf(stderr, "cd: %s :", comLine[0].argv[1]);
+                    perror("");
                 }
             }
                 /*
@@ -245,7 +246,7 @@ int processExternalCommands(command comLine[], int nCommands){
 
             if(execvp (comLine[commandIndex].argv[0],
                        comLine[commandIndex].argv )<0){
-                perror("mish");
+                perror(comLine[commandIndex].argv[0]);
                 exit(EXIT_FAILURE);
             }
 
@@ -290,7 +291,7 @@ int processExternalCommands(command comLine[], int nCommands){
 
         if(execvp(comLine[nCommands - 1].argv[0],
                   comLine[nCommands - 1].argv)<0){
-            perror("mish");
+            perror(comLine[nCommands -1].argv[0]);
             exit(EXIT_FAILURE);
         };
     }

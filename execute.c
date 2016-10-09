@@ -54,11 +54,13 @@ int redirect(char *filename, int flags, int destfd){
         int fdr = open (filename, O_RDONLY);
         if (fdr<0){
             perror(filename);
+        } else {
+            if(dup2(fdr, destfd) < 0){
+                perror("dup2");
+            };
         }
 
-        if(dup2(fdr, destfd) < 0){
-            perror("dup2");
-        };
+
 
 
 
