@@ -10,8 +10,17 @@ all: mish
 mish: mish.o execute.o parser.o sighant.o
 	$(CC) $(CFLAGS) -o mish sighant.o execute.o parser.o mish.o
 
-mish.o execute.o parser.o: sighant.c sighant.h parser.c parser.h execute.c execute.h mish.c mish.h
-	$(CC) $(CFLAGS) -c -g sighant.c parser.c execute.c mish.c
+mish.o: mish.c mish.h
+	$(CC) $(CFLAGS) -c -g mish.c
+
+execute.o: execute.c execute.h
+	$(CC) $(CFLAGS) -c -g execute.c
+
+parser.o: parser.c parser.h
+	$(CC) $(CFLAGS) -c -g parser.c
+
+sighant.o: sighant.c sighant.h
+	$(CC) $(CFLAGS) -c -g sighant.c
 
 clean:
 	 rm -f rm mish *.o
